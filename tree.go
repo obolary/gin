@@ -65,7 +65,7 @@ func min(a, b int) int {
 func countParams(path string) uint8 {
 	var n uint
 	for i := 0; i < len(path); i++ {
-		if path[i] != ':' && path[i] != '*' {
+		if path[i] != '^' && path[i] != '*' {
 			continue
 		}
 		n++
@@ -137,7 +137,7 @@ func (n *node) addRoute(path string, handlers HandlersChain) {
 			}
 
 			// Find the longest common prefix.
-			// This also implies that the common prefix contains no ':' or '*'
+			// This also implies that the common prefix contains no '^' or '*'
 			// since the existing key can't contain those chars.
 			i := 0
 			max := min(len(path), len(n.path))
@@ -224,7 +224,7 @@ func (n *node) addRoute(path string, handlers HandlersChain) {
 				}
 
 				// Otherwise insert it
-				if c != ':' && c != '*' {
+				if c != '^' && c != '*' {
 					// []byte for proper unicode char conversion, see #65
 					n.indices += string([]byte{c})
 					child := &node{
@@ -254,10 +254,10 @@ func (n *node) addRoute(path string, handlers HandlersChain) {
 func (n *node) insertChild(numParams uint8, path string, fullPath string, handlers HandlersChain) {
 	var offset int // already handled bytes of the path
 
-	// find prefix until first wildcard (beginning with ':' or '*')
+	// find prefix until first wildcard (beginning with '^' or '*')
 	for i, max := 0, len(path); numParams > 0; i++ {
 		c := path[i]
-		if c != ':' && c != '*' {
+		if c != '^' && c != '*' {
 			continue
 		}
 
@@ -265,8 +265,8 @@ func (n *node) insertChild(numParams uint8, path string, fullPath string, handle
 		end := i + 1
 		for end < max && path[end] != '/' {
 			switch path[end] {
-			// the wildcard name must not contain ':' and '*'
-			case ':', '*':
+			// the wildcard name must not contain '^' and '*'
+			case '^', '*':
 				panic("only one wildcard per path segment is allowed, has: '" +
 					path[i:] + "' in path '" + fullPath + "'")
 			default:
@@ -286,7 +286,7 @@ func (n *node) insertChild(numParams uint8, path string, fullPath string, handle
 			panic("wildcards must be named with a non-empty name in path '" + fullPath + "'")
 		}
 
-		if c == ':' { // param
+		if c == '^' { // param
 			// split path at the beginning of the wildcard
 			if i > 0 {
 				n.path = path[offset:i]
