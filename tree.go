@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // at https://github.com/julienschmidt/httprouter/blob/master/LICENSE
 
+// MODIFIED - change parameter token to caret
+
 package gin
 
 import (
